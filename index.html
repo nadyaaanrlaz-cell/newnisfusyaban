@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gema Nisfu Sya'ban - Interaktif & Doa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+        .arabic { font-family: 'Amiri', serif; }
+        .card-glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .btn-primary {
+            background: linear-gradient(to right, #059669, #10b981);
+            transition: all 0.3s ease;
+        }
+        #ecard-preview {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&q=80&w=800');
+            background-size: cover;
+            background-position: center;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Header Section -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 gradient-text">Nisfu Sya'ban 1447H</h1>
+            <p class="text-slate-400 text-lg">Malam Pengampunan & Papan Maaf Publik</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left Column: Generator & Tools (4 cols) -->
+            <div class="lg:col-span-4 space-y-6">
+                <div class="card-glass p-6">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <span>🎨</span> Pembuat Kartu
+                    </h2>
+                    <div class="space-y-4">
+                        <input type="text" id="input-name" placeholder="Nama Anda" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 focus:outline-none focus:border-emerald-500" oninput="updateCard()">
+                        <textarea id="input-message" rows="3" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 focus:outline-none focus:border-emerald-500" oninput="updateCard()" placeholder="Pesan maaf..."></textarea>
+                        <button onclick="postToPublic()" id="btn-post" class="w-full btn-primary p-3 rounded-lg font-semibold flex justify-center items-center gap-2">
+                            <span>🚀</span> Kirim ke Papan Publik
+                        </button>
+                        <button onclick="copyText()" class="w-full bg-slate-700 hover:bg-slate-600 p-3 rounded-lg font-medium">Salin Teks WhatsApp</button>
+                    </div>
+                </div>
+
+                <div class="card-glass p-6">
+                    <h2 class="text-lg font-semibold mb-3">Amalan & Doa</h2>
+                    <div id="amalan-list" class="space-y-2">
+                        <!-- Amalan items -->
+                        <div class="flex items-center gap-3 p-2 bg-white/5 rounded-lg">
+                            <input type="checkbox" class="w-5 h-5 accent-emerald-500">
+                            <span class="text-sm">Yasin 3x & Shalat Sunnah</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-2 bg-white/5 rounded-lg">
+                            <input type="checkbox" class="w-5 h-5 accent-emerald-500">
+                            <span class="text-sm">Istighfar 100x</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Column: Preview & Public Board (8 cols) -->
+            <div class="lg:col-span-8 space-y-6">
+                
+                <!-- Card Preview (Horizontal on desktop) -->
+                <div id="ecard-preview" class="w-full rounded-[2rem] p-8 flex flex-col md:flex-row items-center gap-8 shadow-2xl relative overflow-hidden">
+                    <div class="flex-1 text-center md:text-left">
+                        <div class="arabic text-3xl text-amber-400 mb-2">ليلة نصف شعبان</div>
+                        <h3 class="text-xl font-bold mb-3 text-white">Nisfu Sya'ban 1447H</h3>
+                        <p id="preview-message" class="text-slate-200 italic mb-4">"Mohon maaf lahir dan batin atas segala khilaf..."</p>
+                        <p class="text-sm text-slate-400">Dari: <span id="preview-name" class="text-amber-400 font-bold">Hamba Allah</span></p>
+                    </div>
+                    <div class="hidden md:block w-px h-32 bg-white/10"></div>
+                    <div class="text-center">
+                        <p class="text-xs uppercase tracking-widest text-slate-400 mb-1">Mundur</p>
+                        <div id="countdown" class="text-2xl font-bold text-emerald-400 font-mono">--:--:--</div>
+                    </div>
+                </div>
+
+                <!-- Public Message Board -->
+                <div class="card-glass flex flex-col h-[500px]">
+                    <div class="p-4 border-b border-white/10 flex justify-between items-center">
+                        <h2 class="font-bold flex items-center gap-2">
+                            <span class="relative flex h-3 w-3">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                            </span>
+                            Papan Ucapan Publik
+                        </h2>
+                        <span id="user-count" class="text-xs text-slate-400 italic">Memuat pesan...</span>
+                    </div>
+                    
+                    <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+                        <!-- Messages will appear here -->
+                        <div class="text-center py-10 text-slate-500">Menghubungkan ke langit...</div>
+                    </div>
+
+                    <div class="p-3 bg-white/5 rounded-b-[1.5rem] flex gap-2">
+                        <input type="text" id="quick-reply" placeholder="Balas pesan atau sampaikan salam..." class="flex-1 bg-slate-900/50 border border-slate-700 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-emerald-500">
+                        <button onclick="postQuickReply()" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-full text-sm font-bold">Kirim</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <footer class="mt-12 text-center text-slate-500 pb-8 text-sm">
+            <p>Aplikasi ini menggunakan teknologi Cloud untuk menghubungkan hati. <br> ID User Anda: <span id="my-id" class="font-mono text-[10px]"></span></p>
+        </footer>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-6 py-3 rounded-full opacity-0 pointer-events-none transition-all z-50">
+        Berhasil!
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // Firebase Configuration
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'nisfu-syaban-2026';
+
+        let currentUser = null;
+
+        // Initialize Auth
+        const init = async () => {
+            try {
+                await signInAnonymously(auth);
+            } catch (error) {
+                console.error("Auth error", error);
+            }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('my-id').innerText = user.uid;
+                loadMessages();
+            }
+        });
+
+        init();
+
+        // Load Public Messages
+        function loadMessages() {
+            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'messages'));
+            
+            onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('messages-container');
+                container.innerHTML = '';
+                
+                const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                    .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+
+                if (docs.length === 0) {
+                    container.innerHTML = '<div class="text-center text-slate-500 py-10">Belum ada ucapan. Jadilah yang pertama!</div>';
+                    return;
+                }
+
+                docs.forEach(msg => {
+                    const div = document.createElement('div');
+                    div.className = "p-3 bg-white/5 rounded-xl border border-white/5 animate-fade-in";
+                    div.innerHTML = `
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="font-bold text-amber-400 text-sm">${msg.name || 'Hamba Allah'}</span>
+                            <span class="text-[10px] text-slate-500">${msg.timestamp ? new Date(msg.timestamp.seconds * 1000).toLocaleTimeString() : 'Baru saja'}</span>
+                        </div>
+                        <p class="text-slate-200 text-sm">${msg.text}</p>
+                        <div class="mt-2 flex gap-2">
+                            <button onclick="window.likePost('${msg.id}', ${msg.likes || 0})" class="text-[10px] text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded">❤️ ${msg.likes || 0} Aamiin</button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+                
+                document.getElementById('user-count').innerText = `${docs.length} Ucapan masuk`;
+            }, (error) => {
+                console.error("Firestore error", error);
+            });
+        }
+
+        // Action Functions
+        window.postToPublic = async () => {
+            if (!currentUser) return;
+            const name = document.getElementById('input-name').value || 'Hamba Allah';
+            const text = document.getElementById('input-message').value;
+
+            if (!text) {
+                showToast("Tulis pesan dulu ya!");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'messages'), {
+                    name,
+                    text,
+                    uid: currentUser.uid,
+                    likes: 0,
+                    timestamp: serverTimestamp()
+                });
+                document.getElementById('input-message').value = '';
+                showToast("Ucapan terkirim ke papan publik!");
+            } catch (e) {
+                showToast("Gagal mengirim.");
+            }
+        };
+
+        window.postQuickReply = async () => {
+            const text = document.getElementById('quick-reply').value;
+            if (!text || !currentUser) return;
+            
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'messages'), {
+                    name: document.getElementById('input-name').value || 'Hamba Allah',
+                    text: text,
+                    uid: currentUser.uid,
+                    likes: 0,
+                    timestamp: serverTimestamp()
+                });
+                document.getElementById('quick-reply').value = '';
+                showToast("Terkirim!");
+            } catch (e) {}
+        };
+
+        window.likePost = async (id, currentLikes) => {
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'messages', id);
+            await updateDoc(docRef, { likes: currentLikes + 1 });
+        };
+
+        // Utility
+        window.showToast = (msg) => {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.replace('opacity-0', 'opacity-100');
+            setTimeout(() => toast.classList.replace('opacity-100', 'opacity-0'), 2000);
+        };
+    </script>
+
+    <script>
+        // Standard non-Firebase logic
+        function updateCard() {
+            const name = document.getElementById('input-name').value;
+            const msg = document.getElementById('input-message').value;
+            document.getElementById('preview-name').innerText = name || 'Hamba Allah';
+            document.getElementById('preview-message').innerText = msg || 'Mohon maaf lahir dan batin...';
+        }
+
+        function copyText() {
+            const name = document.getElementById('input-name').value || 'Hamba Allah';
+            const msg = document.getElementById('input-message').value || 'Mohon maaf lahir dan batin...';
+            const text = `*Nisfu Sya'ban 1447H*\n\n"${msg}"\n\n- Dari: ${name}`;
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast("Teks disalin untuk WA!");
+        }
+
+        function updateCountdown() {
+            const target = new Date("Feb 14, 2026 18:00:00").getTime();
+            const now = new Date().getTime();
+            const distance = target - now;
+
+            if (distance < 0) {
+                document.getElementById("countdown").innerHTML = "Malam Mulia";
+                return;
+            }
+
+            const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("countdown").innerHTML = 
+                `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+        setInterval(updateCountdown, 1000);
+    </script>
+</body>
+</html>
